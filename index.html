@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Istanbul AI Stocks</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f5f7;
+      --card: rgba(255, 255, 255, 0.65);
+      --border: rgba(0, 0, 0, 0.05);
+      --text: #0f0f10;
+      --muted: #5c5c66;
+      --accent: #0b84ff;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+      font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 20% 20%, #f7fbff 0, #f5f5f7 30%),
+        radial-gradient(circle at 80% 0%, #eef4ff 0, #f5f5f7 40%),
+        radial-gradient(circle at 50% 100%, #f0f4ff 0, #f5f5f7 35%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 14px;
+      background: rgba(0, 0, 0, 0.04);
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
+      width: fit-content;
+      letter-spacing: 0.01em;
+    }
+
+    h1 {
+      font-size: clamp(32px, 4vw, 46px);
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+
+    .lede {
+      max-width: 680px;
+      font-size: 17px;
+      line-height: 1.6;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin: 28px 0;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+    }
+
+    .card h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .flex-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pill-quiet {
+      padding: 6px 10px;
+      background: rgba(11, 132, 255, 0.08);
+      color: #0b84ff;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .select-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin: 14px 0 6px;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: var(--text);
+      min-width: 110px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    select {
+      border: none;
+      background: transparent;
+      width: 100%;
+      font-size: 14px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    select:focus {
+      outline: none;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: rgba(12, 180, 116, 0.1);
+      color: #089f77;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 160px;
+      background: white;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+
+    ul.trends {
+      list-style: none;
+      padding: 0;
+      margin: 14px 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    ul.trends li {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    ul.trends li::before {
+      content: "•";
+      color: var(--accent);
+      font-size: 18px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0;
+    }
+
+    @media (max-width: 600px) {
+      .shell {
+        padding: 32px 16px 64px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="pill">Borsa İstanbul · Yapay Zeka Perspektifi</div>
+      <div class="flex-between">
+        <h1>Istanbul AI Stocks</h1>
+        <div class="pill-quiet">Minimal & sezgisel</div>
+      </div>
+      <p class="lede">
+        BIST hisseleri için kısa vadeli momentum, hacim ve duyarlılık sinyallerini bir araya getirerek yalın bir görünüm sunar.
+        Veriler demo amaçlıdır; kararlarınızı destekleyecek sakin, Apple benzeri bir deneyim düşünün.
+      </p>
+    </header>
+
+    <div class="grid">
+      <section class="card" aria-label="Hisse seçimi">
+        <div class="flex-between">
+          <h3>Hisse & zaman aralığı</h3>
+          <span class="badge" id="sentiment">Pozitif</span>
+        </div>
+        <p class="muted">Yapay zeka puanı, fiyat eğilimi ve hacim sinyalleri birleşimi.</p>
+        <div class="select-row">
+          <div class="chip">
+            <select id="stockSelect" aria-label="Hisse seç">
+              <option value="BIMAS">BIMAS · BİM Birleşik Mağazalar</option>
+              <option value="THYAO">THYAO · Türk Hava Yolları</option>
+              <option value="ASELS">ASELS · Aselsan</option>
+              <option value="GARAN">GARAN · Garanti BBVA</option>
+            </select>
+          </div>
+          <div class="chip">
+            <select id="rangeSelect" aria-label="Zaman aralığı">
+              <option value="1M">1 Ay</option>
+              <option value="3M">3 Ay</option>
+              <option value="6M">6 Ay</option>
+            </select>
+          </div>
+        </div>
+        <canvas id="chart" aria-label="Fiyat grafiği"></canvas>
+        <div class="flex-between">
+          <div>
+            <p class="muted">Son kapanış</p>
+            <h3 id="price">₺142.60</h3>
+          </div>
+          <div style="text-align:right">
+            <p class="muted">Değişim</p>
+            <h3 id="change">+%2.4</h3>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="AI içgörüleri">
+        <div class="flex-between">
+          <h3>AI yorumları</h3>
+          <span class="pill-quiet">Sade özet</span>
+        </div>
+        <p class="muted">Fiyat ivmesi, bilanço notları ve haberlere dair tonlama kısa cümlelerle gelir.</p>
+        <ul class="trends" id="insights">
+          <li>Güçlü perakende satış verileri; aylık hacim ortalamanın %12 üzerinde.</li>
+          <li>Volatilite düşük, beş günlük beta 0.82 ve kar satışı işareti yok.</li>
+          <li>AI duyarlılığı 0.68: temkinli pozitif, geri çekilmelerde alıcı gözleniyor.</li>
+        </ul>
+        <div class="divider"></div>
+        <p class="muted" id="risk">Risk: kısa vadede %5 geri çekilme olasılığına karşı 136 TL desteği izleyin.</p>
+      </section>
+
+      <section class="card" aria-label="Makro vurgular">
+        <div class="flex-between">
+          <h3>Makro nabız</h3>
+          <span class="pill-quiet">Hızlı okunur</span>
+        </div>
+        <ul class="trends">
+          <li>TL likiditesi nötr; gecelik faizler koridorun üst bandında sakin.</li>
+          <li>İmalat PMI 50 üzerinde; sanayi talebine duyarlı hisseler destekleniyor.</li>
+          <li>CDS 285bp seviyesinde; risk primi sakin ve sermaye akımı dengeli.</li>
+        </ul>
+        <div class="divider"></div>
+        <p class="muted">AI, makro gürültüyü azaltarak hikâyeyi üç maddede toplar.</p>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const data = {
+      BIMAS: {
+        sentiment: { label: "Pozitif", tone: "rgba(12, 180, 116, 0.1)", color: "#089f77" },
+        prices: {
+          "1M": [136, 137, 139, 138, 140, 142, 142.6],
+          "3M": [124, 128, 131, 129, 132, 136, 142.6],
+          "6M": [108, 118, 121, 125, 129, 136, 142.6],
+        },
+        change: "+%2.4",
+        risk: "Risk: kısa vadede %5 geri çekilme olasılığına karşı 136 TL desteği izleyin.",
+        insights: [
+          "Güçlü perakende satış verileri; aylık hacim ortalamanın %12 üzerinde.",
+          "Volatilite düşük, beş günlük beta 0.82 ve kar satışı işareti yok.",
+          "AI duyarlılığı 0.68: temkinli pozitif, geri çekilmelerde alıcı gözleniyor.",
+        ],
+      },
+      THYAO: {
+        sentiment: { label: "Dengeli", tone: "rgba(248, 205, 108, 0.18)", color: "#ad7a03" },
+        prices: {
+          "1M": [280, 282, 276, 279, 285, 288, 289],
+          "3M": [260, 264, 272, 269, 280, 286, 289],
+          "6M": [232, 241, 250, 258, 273, 285, 289],
+        },
+        change: "+%1.8",
+        risk: "Risk: yakıt maliyetlerine hassasiyet yüksek; 270 TL altında trend bozulur.",
+        insights: [
+          "Yolcu doluluk oranı %84; sezon etkisiyle bilet fiyatları güçlü.",
+          "Hedge oranı %42; petrol volatilitesine karşı korunma sınırlı.",
+          "AI duyarlılığı 0.54: dengeli, haber akışına duyarlı kalın.",
+        ],
+      },
+      ASELS: {
+        sentiment: { label: "Pozitif", tone: "rgba(12, 180, 116, 0.1)", color: "#089f77" },
+        prices: {
+          "1M": [78, 80, 79, 81, 82, 83, 84],
+          "3M": [70, 73, 75, 77, 79, 82, 84],
+          "6M": [64, 68, 71, 74, 77, 82, 84],
+        },
+        change: "+%3.1",
+        risk: "Risk: kamu ihale takvimi yavaşlarsa 79 TL desteği test edilebilir.",
+        insights: [
+          "Savunma ihracatı siparişleri güçlü; kur avantajı marjları destekliyor.",
+          "RSI 58; aşırı alım bölgesine yaklaşmadan istikrarlı ivme sürüyor.",
+          "AI duyarlılığı 0.71: pozitif, haber akışında jeopolitik riskleri izleyin.",
+        ],
+      },
+      GARAN: {
+        sentiment: { label: "Dengeli", tone: "rgba(248, 205, 108, 0.18)", color: "#ad7a03" },
+        prices: {
+          "1M": [50, 51, 50.5, 52, 52.5, 53, 52.8],
+          "3M": [45, 47, 48.5, 49, 51, 53, 52.8],
+          "6M": [38, 41, 44, 46, 49, 53, 52.8],
+        },
+        change: "-%0.4",
+        risk: "Risk: kredi-mevduat makasında baskı var; 51 TL altı stop seviyesi olarak izlenebilir.",
+        insights: [
+          "Net faiz marjı yatay; swap maliyetleri gerilese de kredi büyümesi ılımlı.",
+          "TGA oranı %2.2 ile kontrol altında, ancak kur volatilitesine duyarlı.",
+          "AI duyarlılığı 0.48: dengeli, bilanço sonrası yön arayışı sürebilir.",
+        ],
+      },
+    };
+
+    const stockSelect = document.getElementById("stockSelect");
+    const rangeSelect = document.getElementById("rangeSelect");
+    const chart = document.getElementById("chart");
+    const ctx = chart.getContext("2d");
+
+    function drawSparkline(values, color = "#0b84ff") {
+      const padding = 16;
+      const width = chart.width = chart.offsetWidth * devicePixelRatio;
+      const height = chart.height = chart.offsetHeight * devicePixelRatio;
+      ctx.clearRect(0, 0, width, height);
+
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const range = max - min || 1;
+
+      const step = (width - padding * 2) / (values.length - 1);
+      ctx.lineWidth = 3;
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = color;
+      ctx.beginPath();
+      values.forEach((val, i) => {
+        const x = padding + i * step;
+        const y = height - padding - ((val - min) / range) * (height - padding * 2);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // gradient fill
+      const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
+      gradient.addColorStop(0, "rgba(11, 132, 255, 0.18)");
+      gradient.addColorStop(1, "rgba(11, 132, 255, 0.02)");
+      ctx.fillStyle = gradient;
+      ctx.lineTo(width - padding, height - padding);
+      ctx.lineTo(padding, height - padding);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function updateUI() {
+      const ticker = stockSelect.value;
+      const range = rangeSelect.value;
+      const details = data[ticker];
+      const values = details.prices[range];
+
+      drawSparkline(values);
+      document.getElementById("price").textContent = `₺${values.at(-1).toFixed(2)}`;
+      document.getElementById("change").textContent = details.change;
+
+      const sentiment = document.getElementById("sentiment");
+      sentiment.textContent = details.sentiment.label;
+      sentiment.style.background = details.sentiment.tone;
+      sentiment.style.color = details.sentiment.color;
+
+      const insights = document.getElementById("insights");
+      insights.innerHTML = "";
+      details.insights.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        insights.appendChild(li);
+      });
+
+      document.getElementById("risk").textContent = details.risk;
+    }
+
+    stockSelect.addEventListener("change", updateUI);
+    rangeSelect.addEventListener("change", updateUI);
+
+    updateUI();
+  </script>
+</body>
+</html>
